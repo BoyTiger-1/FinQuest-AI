@@ -1,6 +1,6 @@
 # FinQuest AI
 
-**Live Demo:** [https://finquest-ai.onrender.com](https://finquest-ai.onrender.com)
+**Live Demo:** [https://finquest-ai.onrender.com](https://finquest-ai.onrender.com) (Make take 1-2 minutes for the website to load)
 
 ## Inspiration
 
