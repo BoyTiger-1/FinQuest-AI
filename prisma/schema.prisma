@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  password     String
+  xp           Int       @default(0)
+  level        Int       @default(1)
+  streak       Int       @default(0)
+  lastActive   DateTime?
+  virtualCash  Float     @default(10000)
+  onboarded    Boolean   @default(false)
+  goals        String    @default("[]")
+  experience   String    @default("beginner")
+  createdAt    DateTime  @default(now())
+
+  progress             LearningProgress[]
+  badges               UserBadge[]
+  stockPortfolio       StockHolding[]
+  businessState        BusinessState?
+  personalFinanceState PersonalFinanceState?
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String
+  difficulty  String
+  order       Int
+  icon        String   @default("📚")
+
+  lessons Lesson[]
+}
+
+model Lesson {
+  id        String @id @default(cuid())
+  moduleId  String
+  title     String
+  content   String
+  type      String
+  order     Int
+  xpReward  Int    @default(10)
+  questions String @default("[]")
+
+  module   Module             @relation(fields: [moduleId], references: [id])
+  progress LearningProgress[]
+}
+
+model LearningProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  lessonId    String
+  completed   Boolean   @default(false)
+  score       Float?
+  nextReview  DateTime?
+  interval    Int       @default(1)
+  easeFactor  Float     @default(2.5)
+  repetitions Int       @default(0)
+  completedAt DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId])
+}
+
+model Badge {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  rarity      String @default("common")
+
+  users UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id])
+
+  @@unique([userId, badgeId])
+}
+
+model StockHolding {
+  id        String   @id @default(cuid())
+  userId    String
+  symbol    String
+  shares    Float
+  avgCost   Float
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, symbol])
+}
+
+model BusinessState {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  cash            Float    @default(0)
+  revenue         Float    @default(0)
+  expenses        Float    @default(0)
+  employees       Int      @default(0)
+  productPrice    Float    @default(0)
+  unitsSold       Int      @default(0)
+  marketingBudget Float    @default(0)
+  rdBudget        Float    @default(0)
+  period          Int      @default(1)
+  history         String   @default("[]")
+  setupComplete   Boolean  @default(false)
+  businessName    String   @default("")
+  industry        String   @default("")
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PersonalFinanceState {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  cash          Float    @default(0)
+  income        Float    @default(0)
+  rent          Float    @default(0)
+  food          Float    @default(0)
+  transport     Float    @default(0)
+  utilities     Float    @default(0)
+  insurance     Float    @default(0)
+  other         Float    @default(0)
+  savings       Float    @default(0)
+  investments   Float    @default(0)
+  debt          Float    @default(0)
+  creditScore   Int      @default(0)
+  month         Int      @default(1)
+  history       String   @default("[]")
+  setupComplete Boolean  @default(false)
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
